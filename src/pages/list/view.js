@@ -13,7 +13,7 @@ function List() {
   useEffect(()=> {
     api.get("/list")
       .then((response) => {
-        setItems(response.data)
+        setItems(response.data.listItems)
     })
   }, []);
 
@@ -29,6 +29,7 @@ function List() {
           }}/>
       </div>
       <div className="list-content">
+        {console.log(items)}
         { (items.length > 0 || newItemInput === "show") ?
           items.map((item) => {
             return (
@@ -38,20 +39,20 @@ function List() {
                 submit={(content) => {
                   setItems(items.map((i) => {
                     if (i.id === content.id){
-                      api.patch(`/list/${content.id}`, {name: content.name}).then(response => setItems(response.data));
+                      api.patch(`/list/${content.id}`, {name: content.name}).then(response => setItems(response.data.listItems));
                     }
                     return(i);
                 }))}}
                 click={(content) => {
                   setItems(items.map((i) => {
                     if (i.id === content.id){
-                      api.patch(`/list/${content.id}`, {done: content.done}).then(response => setItems(response.data));
+                      api.patch(`/list/${content.id}`, {done: content.done}).then(response => setItems(response.data.listItems));
                     }
                     return(i);
                   }))
                 }}
                 delete={(content) => {
-                  api.delete(`/list/${content.id}`).then((response => setItems(response.data)));
+                  api.delete(`/list/${content.id}`).then((response => setItems(response.data.listItems)));
                 }}
           />
         )}) : <h1 className="empty"> Lista Vazia </h1>}
@@ -59,7 +60,7 @@ function List() {
           <form className="new-item-form" onSubmit={(e) => {
             e.preventDefault();
             if(newItemValue.length > 0){
-              api.post(`/list`, {name: newItemValue, edit: false, done: false}).then(response => setItems(response.data));
+              api.post(`/list`, {name: newItemValue, done: false}).then(response => setItems(response.data.listItems));
             }
             setNewItemValue("");
           }}>
