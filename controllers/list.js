@@ -1,4 +1,4 @@
-import { db } from '../db';
+import { db } from '../db.js';
 
 export const getList = (_, res) => {
     const query = "SELECT * FROM list";
@@ -6,47 +6,60 @@ export const getList = (_, res) => {
     db.query(query, (error, data) => {
         if(error) return res.json(error);
 
-        return res.status(200).json(data);
+        return res.status(200).json({listItems: data.map(item => {
+            return {...item, done: item.done === 0 ? false : true}})});
     });
 }
 
 export const addListItem = (req, res) => {
-    const query = "INSERT INTO list(item, done) VALUES (?)";
+    const query = "INSERT INTO list(name, done) VALUES (?)";
+    const responseQuery = "SELECT * FROM list";
 
     const values = [
-        req.body.item,
+        req.body.name,
         req.body.done
     ]
 
-    db.query(q, [values], (error) => {
+    db.query(query, [values], (error) => {
         if(error) return res.json(error);
 
-        return res.status(200).json("Item adicionado com sucesso.");
+        db.query(responseQuery, (error, data) => {
+            if(error) return res.json(error);
+            
+            return res.status(200).json({message: "Item adicionado com sucesso.", listItems: data});
+        })
     })
 }
 
 export const updateListItem = (req, res) => {
-    const query = "UPDATE list SET 'item' = ?, 'done' = ?, 'order' = ? WHERE 'id' = ?";
+    const query = req.body.name ? "UPDATE list SET name = ? WHERE id = ?" : "UPDATE list SET done = ? WHERE id = ?";
+    const responseQuery = "SELECT * FROM list";
 
-    const values = [
-        req.body.item,
-        req.body.done,
-        req.body.order
-    ]
+    const values = req.body.name ? [req.body.name] : [req.body.done];
 
-    db.query(q, [...values, req.params.id], (error) => {
+    db.query(query, [...values, req.params.id], (error) => {
         if(error) return res.json(error);
 
-        return res.status(200).json("Item autalizado com sucesso.");
+        db.query(responseQuery, (error, data) => {
+            if(error) return res.json(error);
+
+            return res.status(201).json({message: "Item atualizado com sucesso.", listItems: data});
+        })
     })
 }
 
 export const deleteListItem = (req, res) => {
-    const query = "DELETE FROM list WHERE 'id' = ?";
+    const query = "DELETE FROM list WHERE id = ?";
+    const responseQuery = "SELECT * FROM list";
 
-    db.query(q, [req.params.id], (error) => {
+    db.query(query, [req.params.id], (error) => {
         if(error) return res.json(error);
 
-        return res.status(200).json("Item removido com sucesso.");
+
+        db.query(responseQuery, (error, data) => {
+            if(error) return res.json(error);
+            
+            return res.status(201).json({message: "Item removido com sucesso.", listItems: data});
+        })
     })
 }

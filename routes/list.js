@@ -1,11 +1,11 @@
 import express from 'express';
-import { getList, addListItem, updateListItem, deleteListItem } from '../controllers/list';
+import { getList, addListItem, updateListItem, deleteListItem } from '../controllers/list.js';
 
 const router = express.Router();
 
-router.get("/list", getList);
-router.post("/list", addListItem);
-router.put("/list/:id", updateListItem);
-router.delete("/list/:id", deleteListItem);
+router.get("/", getList);
+router.post("/", addListItem);
+router.patch("/:id", updateListItem);
+router.delete("/:id", deleteListItem);
 
 export default router;
